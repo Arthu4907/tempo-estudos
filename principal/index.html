@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Foco Estudos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Carregando -->
+<div id="loading" class="center-screen">
+  <p class="loading-text">Carregando…</p>
+</div>
+
+<!-- Entrar / criar conta -->
+<main id="auth" class="center-screen" hidden>
+  <div class="auth-card">
+    <h1>Foco Estudos</h1>
+    <p class="muted">Monte sua agenda da semana, cronometre seus estudos e veja quanto tempo dedicou a cada matéria.</p>
+    <p class="muted" id="resetInfo" hidden>Digite o e-mail da sua conta. Vamos enviar um link para você criar uma senha nova.</p>
+    <div class="seg" id="authTabs" role="group" aria-label="Entrar ou criar conta">
+      <button type="button" data-auth="login" aria-pressed="true">Entrar</button>
+      <button type="button" data-auth="signup" aria-pressed="false">Criar conta</button>
+    </div>
+    <form id="authForm" class="auth-form" novalidate>
+      <label>E-mail
+        <input id="authEmail" type="email" required autocomplete="email" inputmode="email" placeholder="voce@email.com">
+      </label>
+      <label id="passWrap">Senha
+        <input id="authPass" type="password" required minlength="6" autocomplete="current-password" placeholder="Mínimo de 6 caracteres">
+      </label>
+      <button type="submit" class="btn primary" id="authSubmit">Entrar</button>
+    </form>
+    <button type="button" class="link" id="forgotBtn">Esqueci minha senha</button>
+    <button type="button" class="link" id="backLoginBtn" hidden>Voltar para entrar</button>
+    <div class="divider" id="authDivider">ou</div>
+    <button type="button" class="btn" id="googleBtn">Continuar com Google</button>
+    <p class="auth-msg" id="authMsg" role="status" aria-live="polite"></p>
+    <a class="muted" href="/principal/privacidade/privacidade.html" style="font-size:14px;align-self:center">Política de Privacidade</a>
+  </div>
+</main>
+
+<!-- Criar nova senha (aberta pelo link do e-mail) -->
+<main id="recovery" class="center-screen" hidden>
+  <div class="auth-card">
+    <h1>Nova senha</h1>
+    <p class="muted">Escolha uma senha nova para a sua conta.</p>
+    <form id="recoveryForm" class="auth-form" novalidate>
+      <label>Nova senha
+        <input id="newPass" type="password" required minlength="6" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+      </label>
+      <label>Repita a nova senha
+        <input id="newPass2" type="password" required minlength="6" autocomplete="new-password">
+      </label>
+      <button type="submit" class="btn primary" id="recoverySubmit">Salvar nova senha</button>
+    </form>
+    <p class="auth-msg" id="recoveryMsg" role="status" aria-live="polite"></p>
+  </div>
+</main>
+
+<!-- App -->
+<div class="wrap" id="app" hidden>
+  <header>
+    <h1>Foco Estudos</h1>
+    <div class="head-right">
+      <div class="date" id="date"></div>
+      <div class="user">
+        <span id="userEmail"></span>
+        <button type="button" class="link" id="logoutBtn">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="top">
+    <section class="panel timer" aria-label="Cronômetro de estudos">
+      <div class="seg" role="group" aria-label="Modo do cronômetro">
+        <button type="button" data-action="mode" data-mode="pomo" aria-pressed="true">Blocos de foco</button>
+        <button type="button" data-action="mode" data-mode="livre" aria-pressed="false">Cronômetro livre</button>
+      </div>
+      <label class="subject">
+        <span class="sr">Matéria que você vai estudar</span>
+        <input id="subject" list="subjects" placeholder="O que você vai estudar? Ex.: Java, SQL…" autocomplete="off" maxlength="60" style="width:100%">
+      </label>
+      <datalist id="subjects"></datalist>
+      <div class="ring-box">
+        <svg viewBox="0 0 260 260" aria-hidden="true">
+          <circle class="ring-bg" cx="130" cy="130" r="116"/>
+          <circle class="ring-fg" id="ring" cx="130" cy="130" r="116"/>
+        </svg>
+        <div class="ring-center">
+          <div class="digits" id="digits" aria-live="off">30:00</div>
+          <div class="phase" id="phase">Foco</div>
+        </div>
+      </div>
+      <div class="phase-sub" id="phaseSub"></div>
+      <div class="controls">
+        <button type="button" class="btn alarm" data-action="stopalarm" id="alarmBtn" hidden>Parar alarme</button>
+        <button type="button" class="btn primary" data-action="toggle" id="mainBtn">Iniciar</button>
+        <button type="button" class="btn" data-action="skip" id="skipBtn">Pular pausa</button>
+        <button type="button" class="btn" data-action="finish" id="finishBtn">Encerrar e salvar</button>
+      </div>
+      <div class="settings" id="settings">
+        <label>Foco <input type="number" id="focusMin" min="1" max="180" inputmode="numeric"> min</label>
+        <label>Pausa <input type="number" id="breakMin" min="1" max="60" inputmode="numeric"> min</label>
+        <button type="button" class="link" data-action="testalarm">Testar alarme</button>
+      </div>
+    </section>
+
+    <section class="panel today" aria-labelledby="todayTitle">
+      <div>
+        <h2 id="todayTitle">Hoje</h2>
+        <div class="stats">
+          <div class="stat"><b id="stToday">0 min</b><span>estudado hoje</span></div>
+          <div class="stat"><b id="stWeek">0 min</b><span>nesta semana</span></div>
+          <div class="stat"><b id="stDone">0/0</b><span>blocos feitos hoje</span></div>
+        </div>
+      </div>
+      <ul class="list" id="todayList"></ul>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="weekTitle">
+    <div class="week-head">
+      <h2 id="weekTitle">Agenda da semana</h2>
+      <span class="muted" id="weekRange"></span>
+    </div>
+    <form class="add" id="addForm">
+      <label class="wide">Matéria
+        <input id="fSubject" list="subjects" required maxlength="60" placeholder="Ex.: Banco de dados" autocomplete="off">
+      </label>
+      <label>Dia
+        <select id="fDay"></select>
+      </label>
+      <label>Início
+        <input id="fStart" type="time" value="19:00" required>
+      </label>
+      <label>Duração (min)
+        <input id="fDur" type="number" min="5" max="600" step="5" value="60" required inputmode="numeric">
+      </label>
+      <button type="submit" class="btn primary" id="addBtn">Adicionar bloco</button>
+    </form>
+    <div class="week" id="week"></div>
+  </section>
+
+  <section class="panel hist" aria-label="Histórico de estudos">
+    <div>
+      <h2>Tempo por matéria na semana</h2>
+      <div class="bars" id="bars"></div>
+    </div>
+    <div>
+      <h2>Últimas sessões</h2>
+      <div id="sessions"></div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js" defer></script>
+</body>
+</html>
